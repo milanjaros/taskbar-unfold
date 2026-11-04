@@ -1,0 +1,4 @@
+101 RCDATA "payload.dll"
+#ifdef EMBED_SYMBOLS
+102 RCDATA "symbols.bin"
+#endif

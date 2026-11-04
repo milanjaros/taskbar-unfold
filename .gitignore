@@ -1,0 +1,21 @@
+# Build output
+*.cmd
+*.exe
+*.dll
+*.obj
+*.exp
+*.lib
+*.res
+*.pdb
+
+# Per-machine symbol files and runtime state (including settings backups)
+/.taskbar-unfold/
+/symbols/
+/symbols.bin
+/pdb-url.txt
+/result.txt
+/settings-backup.*
+
+# Editors
+/.vs/
+/.vscode/
