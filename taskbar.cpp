@@ -177,6 +177,15 @@ struct Backup
     DWORD value[2]{};
 };
 static constexpr const wchar_t *SettingNames[] = {L"TaskbarGlomLevel", L"MMTaskbarGlomLevel"};
+static void RefreshTaskbar()
+{
+    DWORD_PTR result;
+    // A null lParam triggers TrayUI::_HandleSettingChange. TraySettings alone
+    // doesn't force existing view models to reevaluate their label bindings.
+    HWND taskbar = FindWindowW(L"Shell_TrayWnd", nullptr);
+    if (taskbar)
+        SendMessageTimeoutW(taskbar, WM_SETTINGCHANGE, 0, 0, SMTO_ABORTIFHUNG, 3000, &result);
+}
 static void Settings(bool restore)
 {
     HKEY key;
@@ -213,7 +222,20 @@ static void Settings(bool restore)
             throw std::runtime_error("Cannot save taskbar settings backup.");
         }
     }
+    // Force a grouping transition even when the registry already contains the
+    // requested values (for example after Explorer restarts). This invalidates
+    // the cached HasLabel value on existing buttons with the hooks installed.
     bool ok = true;
+    for (int i = 0; i < 2; i++)
+    {
+        DWORD target = restore ? (b.present[i] ? b.value[i] : 0) : 2;
+        DWORD temporary = target == 2 ? 0 : 2;
+        auto error = RegSetValueExW(key, SettingNames[i], 0, REG_DWORD,
+                                   reinterpret_cast<BYTE *>(&temporary), sizeof(temporary));
+        ok = ok && error == ERROR_SUCCESS;
+    }
+    RefreshTaskbar();
+    Sleep(400);
     for (int i = 0; i < 2; i++)
     {
         DWORD value = restore ? b.value[i] : 2;
@@ -235,6 +257,7 @@ static void Settings(bool restore)
         std::filesystem::remove(path);
     DWORD_PTR result;
     SendMessageTimeoutW(HWND_BROADCAST, WM_SETTINGCHANGE, 0, reinterpret_cast<LPARAM>(L"TraySettings"), SMTO_ABORTIFHUNG, 3000, &result);
+    RefreshTaskbar();
 }
 struct Symbols
 {

@@ -13,7 +13,8 @@ taskbar-unfold.exe probe
 ```
 
 `start` activates label hooks and sets Windows to never combine buttons on all
-taskbars. `stop` removes the hooks and restores the original registry values.
+taskbars. Existing buttons are refreshed by briefly switching the grouping mode.
+`stop` removes the hooks and restores the original registry values.
 `probe` checks symbol configuration without changing Explorer. Run as the
 signed-in user; administrator rights are not required.
 
@@ -64,7 +65,7 @@ timestamp and size before using configured addresses.
 
 Windows internals are undocumented and updates may require code changes as well
 as new symbols. Other taskbar customizers can conflict. Existing buttons may
-need a layout refresh or a new window before changes appear. Restarting Explorer
+still depend on compatible Windows label bindings. Restarting Explorer
 removes the in-memory hooks.
 
 ## License
